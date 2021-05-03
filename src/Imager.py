@@ -10,7 +10,7 @@
 #
 ## https://github.com/NESCAU-UFLA/SimpleForensics
 
-import hashlib
+from Hasher import hasher
 
 CLUSTER_SIZE = 512
 
@@ -18,41 +18,33 @@ class Imager:
     def __init__(self, inputPath: str = "", outputPath: str = ""):
         self.__inputPath = inputPath
         self.__outputPath = outputPath
-        self.__hashes = {
-            'input': {
-                'md5': "",
-                'sha1': "",
-            },
-            'output': {
-                'md5': "",
-                'sha1': "",
-            }
+        self.hashes = {
+            'input': {},
+            'output': {}
         }
     
     def copy(self):
-        md5 = hashlib.md5()
-        sha1 = hashlib.sha1()
+        hasher.clear()
         with open(self.__inputPath, 'rb') as inputFile:
             with open(self.__outputPath, 'wb') as outputFile:
                 data = inputFile.read(CLUSTER_SIZE)
+                i = 1
                 while data:
-                    md5.update(data)
-                    sha1.update(data)
+                    hasher.update(data)
                     outputFile.write(data)
+                    #print(f"Copied: {i*CLUSTER_SIZE} bytes")
                     data = inputFile.read(CLUSTER_SIZE)
-        self.__hashes['input'] = {
-            'md5': md5.hexdigest(),
-            'sha1': sha1.hexdigest(),
-        }
-        md5 = hashlib.md5()
-        sha1 = hashlib.sha1()
+                    i += 1
+        self.hashes['input'] = hasher.getHashes()
+    
+    def checkIntegrity(self):
+        hasher.clear()
         with open(self.__outputPath, 'rb') as outputFile:
-            data = inputFile.read(CLUSTER_SIZE)
+            data = outputFile.read(CLUSTER_SIZE)
             while data:
-                md5.update(data)
-                sha1.update(data)
+                hasher.update(data)
                 data = outputFile.read(CLUSTER_SIZE)
-        self.__hashes['output'] = {
-            'md5': md5.hexdigest(),
-            'sha1': sha1.hexdigest(),
-        }
+        self.hashes['output'] = hasher.getHashes()
+        if self.hashes['input'] == self.hashes['output']:
+            return True
+        return False

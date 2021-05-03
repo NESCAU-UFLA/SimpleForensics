@@ -10,8 +10,37 @@
 #
 ## https://github.com/NESCAU-UFLA/SimpleForensics
 
-class CLIParser:
-    def __init__(self, argv):
-        self.__argv = argv
+import hashlib
+
+class Hasher:
+    __instance = None
+
+    @staticmethod
+    def getInstance():
+        if Hasher.__instance == None:
+            Hasher()
+        return Hasher.__instance
+
+    def __init__(self):
+        if Hasher.__instance != None:
+            raise Exception("This class is a singleton!")
+        else:
+            Hasher.__instance = self
+        self.md5 = hashlib.md5()
+        self.sha1 = hashlib.sha1()
     
-    
+    def getHashes(self):
+        return {
+            'md5': self.md5.hexdigest(),
+            'sha1': self.sha1.hexdigest(),
+        }
+
+    def clear(self):
+        self.md5 = hashlib.md5()
+        self.sha1 = hashlib.sha1()
+
+    def update(self, data: bytes):
+        self.md5.update(data)
+        self.sha1.update(data)
+
+hasher = Hasher.getInstance()

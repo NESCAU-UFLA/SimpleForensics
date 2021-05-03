@@ -12,12 +12,20 @@
 #
 ## https://github.com/NESCAU-UFLA/SimpleForensics
 
-from .CLIParser import CLIParser
+from Imager import Imager
 
 import sys
 
 def main():
-    CLIParser = CLIParser(sys.argv)
+    argv = sys.argv
+    imager = Imager(argv[1], argv[2])
+    imager.copy()
+    print(f"Evidence hashes: {imager.hashes['input']}")
+    if imager.checkIntegrity():
+        print("Success!")
+    else:
+        print("Failed!")
+    print(f"Image hashes: {imager.hashes['output']}")
 
 if __name__ == "__main__":
     main()
