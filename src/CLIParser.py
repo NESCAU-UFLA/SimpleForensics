@@ -12,28 +12,20 @@
 #
 ## https://github.com/NESCAU-UFLA/SimpleForensics
 
-from Imager import Imager
-from CLIParser import CLIParser
+import sys
 
-def main():
-    parser = CLIParser()
-    inputPath, outputPath = parser.getFilePaths()
-    imager = Imager(inputPath, outputPath)
-    if parser.isWipe():
-        imager.wipe()
-        print("File wiped!")
-    else:
-        imager.copy()
-        if imager.checkIntegrity():
-            print("Success!")
-        else:
-            print("Failed!")
-        print("\nInput hashes:")
-        print(f"MD5: {imager.hashes['input']['md5']}")
-        print(f"SHA1: {imager.hashes['input']['sha1']}\n")
-        print("Output hashes:")
-        print(f"MD5: {imager.hashes['output']['md5']}")
-        print(f"SHA1: {imager.hashes['output']['sha1']}")
-
-if __name__ == "__main__":
-    main()
+class CLIParser:
+    def __init__(self):
+        self.__argv = sys.argv
+    
+    def getFilePaths(self):
+        inputPath = ''
+        for arg in self.__argv:
+            if 'if=' in arg:
+                inputPath = arg.split('=')[1]
+            if 'of=' in arg:
+                outputPath = arg.split('=')[1]
+        return (inputPath, outputPath)
+    
+    def isWipe(self):
+        return '--wipe' in self.__argv

@@ -18,6 +18,7 @@ class Imager:
     def __init__(self, inputPath: str = "", outputPath: str = ""):
         self.__inputPath = inputPath
         self.__outputPath = outputPath
+        self.BUFFER_SIZE = CLUSTER_SIZE
         self.hashes = {
             'input': {},
             'output': {}
@@ -27,24 +28,34 @@ class Imager:
         hasher.clear()
         with open(self.__inputPath, 'rb') as inputFile:
             with open(self.__outputPath, 'wb') as outputFile:
-                data = inputFile.read(CLUSTER_SIZE)
+                data = inputFile.read(self.BUFFER_SIZE)
                 i = 1
                 while data:
                     hasher.update(data)
                     outputFile.write(data)
-                    #print(f"Copied: {i*CLUSTER_SIZE} bytes")
-                    data = inputFile.read(CLUSTER_SIZE)
+                    #print(f"Copied: {i*self.BUFFER_SIZE} bytes")
+                    data = inputFile.read(self.BUFFER_SIZE)
                     i += 1
         self.hashes['input'] = hasher.getHashes()
     
     def checkIntegrity(self):
         hasher.clear()
         with open(self.__outputPath, 'rb') as outputFile:
-            data = outputFile.read(CLUSTER_SIZE)
+            data = outputFile.read(self.BUFFER_SIZE)
             while data:
                 hasher.update(data)
-                data = outputFile.read(CLUSTER_SIZE)
+                data = outputFile.read(self.BUFFER_SIZE)
         self.hashes['output'] = hasher.getHashes()
         if self.hashes['input'] == self.hashes['output']:
             return True
         return False
+    
+    def wipe(self):
+        with open(self.__outputPath, 'r+b') as outputFile:
+            data = outputFile.read(self.BUFFER_SIZE)
+            i = 1
+            while data:
+                outputFile.seek((self.BUFFER_SIZE*i)-self.BUFFER_SIZE)
+                outputFile.write(b'\x00'*self.BUFFER_SIZE)
+                data = outputFile.read(self.BUFFER_SIZE)
+                i += 1
