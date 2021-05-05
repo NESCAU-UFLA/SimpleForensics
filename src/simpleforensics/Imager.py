@@ -55,9 +55,7 @@ class Imager:
         except FileNotFoundError:
             raise Exception(f"{self.__outputPath} not found")
         self.hashes['output'] = hasher.getHashes()
-        if self.hashes['input'] == self.hashes['output']:
-            return True
-        return False
+        return self.hashes['input'] == self.hashes['output']
 
     def wipe(self):
         try:
