@@ -27,38 +27,47 @@ class Imager:
 
     def copy(self):
         hasher.clear()
-        with open(self.__inputPath, 'rb') as inputFile:
-            with open(self.__outputPath, 'wb') as outputFile:
-                data = inputFile.read(self.BUFFER_SIZE)
-                i = 1
-                stop = False
-                while data and not stop:
-                    hasher.update(data)
-                    outputFile.write(data)
-                    if i == self.BLOCKS_COUNT:
-                        stop = True
+        try:
+            with open(self.__inputPath, 'rb') as inputFile:
+                with open(self.__outputPath, 'wb') as outputFile:
                     data = inputFile.read(self.BUFFER_SIZE)
-                    i += 1
+                    i = 1
+                    stop = False
+                    while data and not stop:
+                        hasher.update(data)
+                        outputFile.write(data)
+                        if i == self.BLOCKS_COUNT:
+                            stop = True
+                        data = inputFile.read(self.BUFFER_SIZE)
+                        i += 1
+        except FileNotFoundError:
+            raise Exception(f"{self.__inputPath} not found")
         self.hashes['input'] = hasher.getHashes()
 
     def checkIntegrity(self):
         hasher.clear()
-        with open(self.__outputPath, 'rb') as outputFile:
-            data = outputFile.read(self.BUFFER_SIZE)
-            while data:
-                hasher.update(data)
+        try:
+            with open(self.__outputPath, 'rb') as outputFile:
                 data = outputFile.read(self.BUFFER_SIZE)
+                while data:
+                    hasher.update(data)
+                    data = outputFile.read(self.BUFFER_SIZE)
+        except FileNotFoundError:
+            raise Exception(f"{self.__outputPath} not found")
         self.hashes['output'] = hasher.getHashes()
         if self.hashes['input'] == self.hashes['output']:
             return True
         return False
 
     def wipe(self):
-        with open(self.__outputPath, 'r+b') as outputFile:
-            data = outputFile.read(self.BUFFER_SIZE)
-            i = 1
-            while data:
-                outputFile.seek((self.BUFFER_SIZE*i)-self.BUFFER_SIZE)
-                outputFile.write(b'\x00'*self.BUFFER_SIZE)
+        try:
+            with open(self.__outputPath, 'r+b') as outputFile:
                 data = outputFile.read(self.BUFFER_SIZE)
-                i += 1
+                i = 1
+                while data:
+                    outputFile.seek((self.BUFFER_SIZE*i)-self.BUFFER_SIZE)
+                    outputFile.write(b'\x00'*self.BUFFER_SIZE)
+                    data = outputFile.read(self.BUFFER_SIZE)
+                    i += 1
+        except FileNotFoundError:
+            raise Exception(f"{self.__outputPath} not found")
