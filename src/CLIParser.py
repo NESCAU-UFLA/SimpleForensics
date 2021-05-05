@@ -12,20 +12,52 @@
 #
 ## https://github.com/NESCAU-UFLA/SimpleForensics
 
+from Imager import Imager
+
 import sys
 
 class CLIParser:
     def __init__(self):
         self.__argv = sys.argv
+        self.instanceArgs()
     
-    def getFilePaths(self):
-        inputPath = ''
+    def instanceArgs(self):
+        self.inputPath = ''
+        self.outputPath = None
+        self.bufferSize = None
+        self.count = None
         for arg in self.__argv:
             if 'if=' in arg:
-                inputPath = arg.split('=')[1]
+                self.inputPath = arg.split('=')[1]
             if 'of=' in arg:
-                outputPath = arg.split('=')[1]
-        return (inputPath, outputPath)
+                self.outputPath = arg.split('=')[1]
+            if 'bs=' in arg:
+                try:
+                    self.bufferSize = int(arg.split('=')[1])
+                except:
+                    exit("Buffer size must be an integer")
+                if not ((self.bufferSize & (self.bufferSize-1) == 0) and self.bufferSize != 0):
+                    exit("Buffer size must be power of 2")
+            if 'count=' in arg:
+                try:
+                    self.count = int(arg.split('=')[1])
+                    if self.count < 1:
+                        raise Exception()
+                except:
+                    exit("Quantity of blocks must be a positive integer, greater than 0")
+        if not self.outputPath:
+            exit("At least an outputPath file is needed")
     
+    def getFilePaths(self):
+        return (self.inputPath, self.outputPath)
+    
+    def checkBlocksCount(self, imager: Imager):
+        if self.count:
+            imager.BLOCKS_COUNT = self.count
+
+    def checkBufferSize(self, imager: Imager):
+        if self.bufferSize:
+            imager.BUFFER_SIZE = self.bufferSize
+
     def isWipe(self):
         return '--wipe' in self.__argv

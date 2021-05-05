@@ -19,25 +19,28 @@ class Imager:
         self.__inputPath = inputPath
         self.__outputPath = outputPath
         self.BUFFER_SIZE = CLUSTER_SIZE
+        self.BLOCKS_COUNT = 0
         self.hashes = {
             'input': {},
             'output': {}
         }
-    
+
     def copy(self):
         hasher.clear()
         with open(self.__inputPath, 'rb') as inputFile:
             with open(self.__outputPath, 'wb') as outputFile:
                 data = inputFile.read(self.BUFFER_SIZE)
                 i = 1
-                while data:
+                stop = False
+                while data and not stop:
                     hasher.update(data)
                     outputFile.write(data)
-                    #print(f"Copied: {i*self.BUFFER_SIZE} bytes")
+                    if i == self.BLOCKS_COUNT:
+                        stop = True
                     data = inputFile.read(self.BUFFER_SIZE)
                     i += 1
         self.hashes['input'] = hasher.getHashes()
-    
+
     def checkIntegrity(self):
         hasher.clear()
         with open(self.__outputPath, 'rb') as outputFile:
@@ -49,7 +52,7 @@ class Imager:
         if self.hashes['input'] == self.hashes['output']:
             return True
         return False
-    
+
     def wipe(self):
         with open(self.__outputPath, 'r+b') as outputFile:
             data = outputFile.read(self.BUFFER_SIZE)

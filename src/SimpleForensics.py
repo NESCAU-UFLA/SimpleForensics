@@ -19,16 +19,21 @@ def main():
     parser = CLIParser()
     inputPath, outputPath = parser.getFilePaths()
     imager = Imager(inputPath, outputPath)
+    parser.checkBufferSize(imager)
+    parser.checkBlocksCount(imager)
     if parser.isWipe():
         imager.wipe()
-        print("File wiped!")
+        print("Disk wiped!")
     else:
         imager.copy()
         if imager.checkIntegrity():
             print("Success!")
         else:
             print("Failed!")
-        print("\nInput hashes:")
+        if not imager.BLOCKS_COUNT:
+            print("\nInput hashes:")
+        else:
+            print(f"\nInput hashes for the first {imager.BLOCKS_COUNT} blocks:")
         print(f"MD5: {imager.hashes['input']['md5']}")
         print(f"SHA1: {imager.hashes['input']['sha1']}\n")
         print("Output hashes:")
