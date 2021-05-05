@@ -12,7 +12,7 @@
 #
 ## https://github.com/NESCAU-UFLA/SimpleForensics
 
-from Imager import Imager
+from .Imager import Imager
 
 import sys
 

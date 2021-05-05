@@ -10,7 +10,7 @@
 #
 ## https://github.com/NESCAU-UFLA/SimpleForensics
 
-from Hasher import hasher
+from .Hasher import hasher
 
 CLUSTER_SIZE = 512
 

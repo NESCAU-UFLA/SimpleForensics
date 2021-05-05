@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-
 ## SimpleForensics
 #
 # Authors:
@@ -12,7 +10,30 @@
 #
 ## https://github.com/NESCAU-UFLA/SimpleForensics
 
-from simpleforensics.SimpleForensics import main
+from .Imager import Imager
+from .CLIParser import CLIParser
 
-if __name__ == "__main__":
-    main()
+def main():
+    parser = CLIParser()
+    inputPath, outputPath = parser.getFilePaths()
+    imager = Imager(inputPath, outputPath)
+    parser.checkBufferSize(imager)
+    parser.checkBlocksCount(imager)
+    if parser.isWipe():
+        imager.wipe()
+        print("Disk wiped!")
+    else:
+        imager.copy()
+        if imager.checkIntegrity():
+            print("Success!")
+        else:
+            print("Failed!")
+        if not imager.BLOCKS_COUNT:
+            print("\nInput hashes:")
+        else:
+            print(f"\nInput hashes for the first {imager.BLOCKS_COUNT} blocks:")
+        print(f"MD5: {imager.hashes['input']['md5']}")
+        print(f"SHA1: {imager.hashes['input']['sha1']}\n")
+        print("Output hashes:")
+        print(f"MD5: {imager.hashes['output']['md5']}")
+        print(f"SHA1: {imager.hashes['output']['sha1']}")
