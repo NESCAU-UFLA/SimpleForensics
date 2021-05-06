@@ -11,14 +11,14 @@
 ## https://github.com/NESCAU-UFLA/SimpleForensics
 
 from .Hasher import hasher
-
-CLUSTER_SIZE = 512
+from .utils.consts import SECTOR_SIZE
+from .structuredData.MBR import MBR
 
 class Imager:
     def __init__(self, inputPath: str = "", outputPath: str = ""):
         self.__inputPath = inputPath
         self.__outputPath = outputPath
-        self.BUFFER_SIZE = CLUSTER_SIZE
+        self.BUFFER_SIZE = SECTOR_SIZE
         self.BLOCKS_COUNT = 0
         self.hashes = {
             'input': {},
@@ -70,3 +70,14 @@ class Imager:
                     data = outputFile.read(self.BUFFER_SIZE)
         except FileNotFoundError:
             raise Exception(f"{self.__outputPath} not found")
+
+    def getMBR(self):
+        try:
+            with open(self.__inputPath, 'rb') as inputFile:
+                firstSector = bytearray(inputFile.read(SECTOR_SIZE))
+                if MBR.hasSignature(firstSector):
+                    exit(f"{MBR(firstSector)}")
+                else:
+                    raise Exception("Couldn't identify the MBR")
+        except FileNotFoundError:
+            raise Exception(f"{self.__inputPath} not found")

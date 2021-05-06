@@ -10,36 +10,12 @@
 #
 ## https://github.com/NESCAU-UFLA/SimpleForensics
 
-from .Imager import Imager
-from .CLIParser import CLIParser
+# DISK MANIPULATION CONSTANTS
+SECTOR_SIZE = 512
 
-def main():
-    parser = CLIParser()
-    inputPath, outputPath = parser.getFilePaths()
-    imager = Imager(inputPath, outputPath)
-    #imager.getMBR()
-    parser.checkBufferSize(imager)
-    parser.checkBlocksCount(imager)
-    try:
-        if parser.isWipe():
-            imager.wipe()
-            print("Disk wiped!")
-        else:
-            imager.copy()
-            if imager.checkIntegrity():
-                print("Success!")
-            else:
-                print("Failed!")
-            if not imager.BLOCKS_COUNT:
-                print("\nInput hashes:")
-            else:
-                print(f"\nInput hashes for the first {imager.BLOCKS_COUNT} blocks:")
-            print(f"MD5: {imager.hashes['input']['md5']}")
-            print(f"SHA1: {imager.hashes['input']['sha1']}\n")
-            print("Output hashes:")
-            print(f"MD5: {imager.hashes['output']['md5']}")
-            print(f"SHA1: {imager.hashes['output']['sha1']}")
-    except PermissionError:
-        exit("You need root permissions to read this device")
-    except Exception as e:
-        exit(str(e))
+# BINARY DATA CONVERTERS CONSTANTS
+BYTE = 1
+KILOBYTE = 1024
+MEGABYTE = 1024**2
+GIGABYTE = 1024**3
+TERABYTE = 1024**4
