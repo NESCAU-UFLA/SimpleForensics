@@ -38,7 +38,7 @@ class MBR:
         string += f"WRITE PROTECTION ENABLED: {self.hasWriteProtection()}\n\n"
         for i, p in enumerate(self.partitionTable):
             string += f"Partition {i+1}\n"
-            string += f"   Is bootable: {self.partitionIsActive(p['IS_ACTIVE'])}\n"
+            string += f"   Is bootable: {self.partitionIsBootable(p['IS_ACTIVE'])}\n"
             string += f"   First CHS map: {bytesToStr(p['CHS_MAP_1'])}\n"
             string += f"   Type: {self.getFileSystem(p['TYPE'])}\n"
             string += f"   Second CHS map: {bytesToStr(p['CHS_MAP_2'])}\n"
@@ -46,7 +46,7 @@ class MBR:
             string += f"   Length: {convertToGigabyte(convertSectorsToBytes(sumBytes(p['LENGTH'])))} GiB\n\n"
         return string
 
-    def partitionIsActive(self, flag: bytearray):
+    def partitionIsBootable(self, flag: bytearray):
         if flag == b'\x80':
             return 'YES'
         elif flag == b'\x00':
