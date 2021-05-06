@@ -36,7 +36,7 @@ class MBR:
         string = f"MBR INFORMATION (ass {bytesToStr(self.signature)}):\n\n"
         string += f"DISK SIGNATURE: {bytesToStr(self.diskSignature)}\n"
         string += f"WRITE PROTECTION ENABLED: {self.hasWriteProtection()}\n\n"
-        for i, p in enumerate(self.partitionTable):
+        for i, p in enumerate(self.partitionsTable):
             string += f"Partition {i+1}\n"
             string += f"   Is bootable: {self.partitionIsBootable(p['IS_BOOTABLE'])}\n"
             string += f"   First CHS map: {bytesToStr(p['CHS_MAP_1'])}\n"
