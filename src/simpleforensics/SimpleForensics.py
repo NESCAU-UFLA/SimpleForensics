@@ -10,20 +10,21 @@
 #
 ## https://github.com/NESCAU-UFLA/SimpleForensics
 
-from .Imager import Imager
+from .core.Imager import Imager
 from .CLIParser import CLIParser
 
 def main():
     parser = CLIParser()
     inputPath, outputPath = parser.getFilePaths()
     imager = Imager(inputPath, outputPath)
-    #imager.getMBR()
     parser.checkBufferSize(imager)
     parser.checkBlocksCount(imager)
     try:
         if parser.isWipe():
             imager.wipe()
             print("Disk wiped!")
+        elif parser.isMbrRead():
+            imager.readMBR()
         else:
             imager.copy()
             if imager.checkIntegrity():
@@ -38,7 +39,7 @@ def main():
             print(f"SHA1: {imager.hashes['input']['sha1']}\n")
             print("Output hashes:")
             print(f"MD5: {imager.hashes['output']['md5']}")
-            print(f"SHA1: {imager.hashes['output']['sha1']}")
+            print(f"SHA1: {imager.hashes['output']['sha1']}\n")
     except PermissionError:
         exit("You need root permissions to read this device")
     except Exception as e:

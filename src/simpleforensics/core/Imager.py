@@ -10,9 +10,9 @@
 #
 ## https://github.com/NESCAU-UFLA/SimpleForensics
 
-from .Hasher import hasher
-from .utils.consts import SECTOR_SIZE
-from .structuredData.MBR import MBR
+from ..utils.Hasher import hasher
+from ..utils.consts import SECTOR_SIZE
+from ..structuredData.MBR import MBR
 
 class Imager:
     def __init__(self, inputPath: str = "", outputPath: str = ""):
@@ -71,7 +71,7 @@ class Imager:
         except FileNotFoundError:
             raise Exception(f"{self.__outputPath} not found")
 
-    def getMBR(self):
+    def readMBR(self):
         try:
             with open(self.__inputPath, 'rb') as inputFile:
                 firstSector = bytearray(inputFile.read(SECTOR_SIZE))

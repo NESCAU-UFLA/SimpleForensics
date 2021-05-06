@@ -33,7 +33,7 @@ class MBR:
         self.signature = cutBytes(sector, n=2)
 
     def __str__(self):
-        string = "MBR INFORMATION:\n"
+        string = f"MBR INFORMATION (ass {bytesToStr(self.signature)}):\n\n"
         string += f"DISK SIGNATURE: {bytesToStr(self.diskSignature)}\n"
         string += f"WRITE PROTECTION ENABLED: {self.hasWriteProtection()}\n\n"
         for i, p in enumerate(self.partitionTable):
@@ -43,7 +43,7 @@ class MBR:
             string += f"   Type: {self.getFileSystem(p['TYPE'])}\n"
             string += f"   Second CHS map: {bytesToStr(p['CHS_MAP_2'])}\n"
             string += f"   LBA map: {bytesToStr(p['LBA_MAP'])}\n"
-            string += f"   Length: {convertToGigabyte(self.getPartitionLength(p['LENGTH']))} GiB\n\n"
+            string += f"   Length: {convertToGigabyte(convertSectorsToBytes(sumBytes(p['LENGTH'])))} GiB\n\n"
         return string
 
     def partitionIsActive(self, flag: bytearray):
@@ -89,6 +89,3 @@ class MBR:
         elif flag == b'\xEE':
             return "MBR protection for GPT"
         return '?'
-
-    def getPartitionLength(self, length: bytearray):
-        return sumBytes(length)*SECTOR_SIZE

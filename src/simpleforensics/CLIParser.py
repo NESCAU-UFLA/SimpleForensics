@@ -12,7 +12,7 @@
 #
 ## https://github.com/NESCAU-UFLA/SimpleForensics
 
-from .Imager import Imager
+from .core.Imager import Imager
 
 import sys
 
@@ -45,8 +45,6 @@ class CLIParser:
                         raise Exception()
                 except:
                     exit("Quantity of blocks must be a positive integer, greater than 0")
-        if not self.outputPath:
-            exit("At least an outputPath file is needed")
     
     def getFilePaths(self):
         return (self.inputPath, self.outputPath)
@@ -61,3 +59,6 @@ class CLIParser:
 
     def isWipe(self):
         return '--wipe' in self.__argv
+    
+    def isMbrRead(self):
+        return '--mbr' in self.__argv
