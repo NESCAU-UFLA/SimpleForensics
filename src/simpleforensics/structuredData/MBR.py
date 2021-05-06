@@ -22,8 +22,8 @@ class MBR:
         self.bootCode = cutBytes(sector, n=440)
         self.diskSignature = cutBytes(sector, n=4)
         self.writeProtection = cutBytes(sector, n=2)
-        self.partitionTable = [{
-            'IS_ACTIVE': cutBytes(sector, n=1),
+        self.partitionsTable = [{
+            'IS_BOOTABLE': cutBytes(sector, n=1),
             'CHS_MAP_1': cutBytes(sector, n=3),
             'TYPE': cutBytes(sector, n=1),
             'CHS_MAP_2': cutBytes(sector, n=3),
@@ -38,7 +38,7 @@ class MBR:
         string += f"WRITE PROTECTION ENABLED: {self.hasWriteProtection()}\n\n"
         for i, p in enumerate(self.partitionTable):
             string += f"Partition {i+1}\n"
-            string += f"   Is bootable: {self.partitionIsBootable(p['IS_ACTIVE'])}\n"
+            string += f"   Is bootable: {self.partitionIsBootable(p['IS_BOOTABLE'])}\n"
             string += f"   First CHS map: {bytesToStr(p['CHS_MAP_1'])}\n"
             string += f"   Type: {self.getFileSystem(p['TYPE'])}\n"
             string += f"   Second CHS map: {bytesToStr(p['CHS_MAP_2'])}\n"
