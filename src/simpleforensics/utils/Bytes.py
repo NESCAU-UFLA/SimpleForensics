@@ -10,11 +10,32 @@
 #
 ## https://github.com/NESCAU-UFLA/SimpleForensics
 
-from .consts import *
+class Bytes:
+    @staticmethod
+    def get(
+        thisBytes: bytearray,
+        i: int = 0,
+        n: int = 1
+    ) -> bytearray:
+        return thisBytes[i:(i+n)]
 
-"""converters"""
-def convertSectorsToBytes(sectors: int) -> int:
-    return sectors*SECTOR_SIZE
+    @staticmethod
+    def cut(
+        thisBytes: bytearray,
+        i: int = 0,
+        n: int = 1
+    ) -> bytearray:
+        cutedBytes = Bytes.get(thisBytes, i, n)
+        thisBytes[:] = thisBytes[:i] + thisBytes[(i+n):]
+        return cutedBytes
 
-def convertToGigabyte(byte: int) -> int:
-    return byte/GIGABYTE
+    @staticmethod
+    def sum(bytesToSum: bytearray) -> int:
+        sumBytes = 0
+        for i in range(len(bytesToSum)):
+            sumBytes |= bytesToSum[i]<<(8*i)
+        return sumBytes
+
+    @staticmethod
+    def toString(bytesToString: bytearray) -> str:
+        return f"0x{bytesToString.hex().upper()}"

@@ -61,12 +61,12 @@ class Imager:
         try:
             with open(self.__outputPath, 'r+b') as outputFile:
                 data = outputFile.read(self.BUFFER_SIZE)
-                ACTUAL_BUFFER_SIZE = self.BUFFER_SIZE
+                actualBufferSize = self.BUFFER_SIZE
                 while data:
                     if len(data) < self.BUFFER_SIZE:
-                        ACTUAL_BUFFER_SIZE = len(data)
-                    outputFile.seek(outputFile.tell()-ACTUAL_BUFFER_SIZE)
-                    outputFile.write(b'\x00'*ACTUAL_BUFFER_SIZE)
+                        actualBufferSize = len(data)
+                    outputFile.seek(outputFile.tell()-actualBufferSize)
+                    outputFile.write(b'\x00'*actualBufferSize)
                     data = outputFile.read(self.BUFFER_SIZE)
         except FileNotFoundError:
             raise Exception(f"{self.__outputPath} not found")

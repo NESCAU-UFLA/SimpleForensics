@@ -10,40 +10,41 @@
 #
 ## https://github.com/NESCAU-UFLA/SimpleForensics
 
+from ..utils.Bytes import Bytes
 from ..utils.consts import SECTOR_SIZE
 from ..utils.utils import *
 
 class MBR:
     @staticmethod
     def hasSignature(sector: bytearray):
-        return getBytes(sector, i=510, n=2) == b'\x55\xAA'
+        return Bytes.get(sector, i=510, n=2) == b'\x55\xAA'
 
     def __init__(self, sector: bytearray):
-        self.bootCode = cutBytes(sector, n=440)
-        self.diskSignature = cutBytes(sector, n=4)
-        self.writeProtection = cutBytes(sector, n=2)
+        self.bootCode = Bytes.cut(sector, n=440)
+        self.diskSignature = Bytes.cut(sector, n=4)
+        self.writeProtection = Bytes.cut(sector, n=2)
         self.partitionsTable = [{
-            'IS_BOOTABLE': cutBytes(sector, n=1),
-            'CHS_MAP_1': cutBytes(sector, n=3),
-            'TYPE': cutBytes(sector, n=1),
-            'CHS_MAP_2': cutBytes(sector, n=3),
-            'LBA_MAP': cutBytes(sector, n=4),
-            'LENGTH': cutBytes(sector, n=4)
-        } for i in range(4)]
-        self.signature = cutBytes(sector, n=2)
+            'IS_BOOTABLE': Bytes.cut(sector, n=1),
+            'CHS_MAP_1': Bytes.cut(sector, n=3),
+            'TYPE': Bytes.cut(sector, n=1),
+            'CHS_MAP_2': Bytes.cut(sector, n=3),
+            'LBA_MAP': Bytes.cut(sector, n=4),
+            'LENGTH': Bytes.cut(sector, n=4)
+        } for _ in range(4)]
+        self.signature = Bytes.cut(sector, n=2)
 
     def __str__(self):
-        string = f"MBR INFORMATION (ass {bytesToStr(self.signature)}):\n\n"
-        string += f"DISK SIGNATURE: {bytesToStr(self.diskSignature)}\n"
+        string = f"MBR INFORMATION (ass {Bytes.toString(self.signature)}):\n\n"
+        string += f"DISK SIGNATURE: {Bytes.toString(self.diskSignature)}\n"
         string += f"WRITE PROTECTION ENABLED: {self.hasWriteProtection()}\n\n"
         for i, p in enumerate(self.partitionsTable):
             string += f"Partition {i+1}\n"
             string += f"   Is bootable: {self.partitionIsBootable(p['IS_BOOTABLE'])}\n"
-            string += f"   First CHS map: {bytesToStr(p['CHS_MAP_1'])}\n"
+            string += f"   First CHS map: {Bytes.toString(p['CHS_MAP_1'])}\n"
             string += f"   Type: {self.getFileSystem(p['TYPE'])}\n"
-            string += f"   Second CHS map: {bytesToStr(p['CHS_MAP_2'])}\n"
-            string += f"   LBA map: {bytesToStr(p['LBA_MAP'])}\n"
-            string += f"   Length: {convertToGigabyte(convertSectorsToBytes(sumBytes(p['LENGTH'])))} GiB\n\n"
+            string += f"   Second CHS map: {Bytes.toString(p['CHS_MAP_2'])}\n"
+            string += f"   LBA map: {Bytes.toString(p['LBA_MAP'])}\n"
+            string += f"   Length: {convertToGigabyte(convertSectorsToBytes(Bytes.sum(p['LENGTH'])))} GiB\n\n"
         return string
 
     def partitionIsBootable(self, flag: bytearray):
