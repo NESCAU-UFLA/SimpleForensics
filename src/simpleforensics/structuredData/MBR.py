@@ -19,6 +19,22 @@ class MBR:
     def hasSignature(sector: bytearray):
         return Bytes.get(sector, i=510, n=2) == b'\x55\xAA'
 
+    FILESYSTEM_MAP = {
+        b'\x00': "No file system or partition",
+        b'\x01': "FAT12",
+        **dict.fromkeys([b'\x04', b'\x06'], "FAT16 with CHS mapping"),
+        b'\x08': "FAT12 or FAT16 with LBA mapping",
+        b'\x07': "NTFS or exFAT",
+        b'\x0B': "FAT32 with CHS mapping",
+        b'\x0C': "FAT32 with LBA mapping",
+        b'\x82': "Linux swap partition",
+        b'\x83': "Native linux filesystem partition",
+        b'\x8E': "Linux Logical Volume Manager (LVM)",
+        b'\x96': "ISO-9660",
+        b'\xAF': "HFS or HFS+",
+        b'\xEE': "MBR protection for GPT",
+    }
+
     def __init__(self, sector: bytearray):
         self.bootCode = Bytes.cut(sector, n=440)
         self.diskSignature = Bytes.cut(sector, n=4)
@@ -63,30 +79,7 @@ class MBR:
         return '?'
 
     def getFileSystem(self, flag: bytearray):
-        if flag == b'\x00':
-            return "No file system or partition"
-        elif flag == b'\x01':
-            return "FAT12"
-        elif flag == b'\x04' or flag == b'\x06':
-            return "FAT16 with CHS mapping"
-        elif flag == b'\x08':
-            return "FAT12 or FAT16 with LBA mapping"
-        elif flag == b'\x07':
-            return "NTFS or exFAT"
-        elif flag == b'\x0B':
-            return "FAT32 with CHS mapping"
-        elif flag == b'\x0C':
-            return "FAT32 with LBA mapping"
-        elif flag == b'\x82':
-            return "Linux swap partition"
-        elif flag == b'\x83':
-            return "Native linux filesystem partition"
-        elif flag == b'\x8E':
-            return "Linux Logical Volume Manager (LVM)"
-        elif flag == b'\x96':
-            return "ISO-9660"
-        elif flag == b'\xAF':
-            return "HFS or HFS+"
-        elif flag == b'\xEE':
-            return "MBR protection for GPT"
-        return '?'
+        try:
+            return MBR.FILESYSTEM_MAP[bytes(flag)]
+        except:
+            return '?'
