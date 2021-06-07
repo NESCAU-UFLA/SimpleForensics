@@ -33,11 +33,15 @@ class Bytes:
     def cmp(
         first: bytearray,
         second: bytearray,
-        endian: str = 'little'
+        endian: str = 'default'
     ) -> bool:
-        if endian.lower() == 'little':
+        if endian.lower() == 'default':
             return first == second
-        elif endian.lower() == 'big':
+        elif endian.lower() == 'invert':
+            return first == second[::-1]
+        elif endian.lower() == 'both':
+            if first == second:
+                return True
             return first == second[::-1]
         raise Exception("Invalid endian set")
 

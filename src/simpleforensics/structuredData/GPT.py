@@ -28,7 +28,7 @@ class GPT:
                     if Bytes.cmp(
                         first=Bytes.get(secondSector, n=8),
                         second=b'\x54\x52\x41\x50\x20\x49\x46\x45',
-                        endian='big'
+                        endian='invert'
                     ):
                         return True
         return False
