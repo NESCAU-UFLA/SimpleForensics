@@ -10,44 +10,34 @@
 #
 ## https://github.com/NESCAU-UFLA/SimpleForensics
 
-class Bytes:
-    @staticmethod
-    def get(
-        thisBytes: bytearray,
-        i: int = 0,
-        n: int = 1
-    ) -> bytearray:
-        return thisBytes[i:(i+n)]
+from .MBR import MBR
+from ..utils.Bytes import Bytes
+from ..utils.consts import SECTOR_SIZE
+from ..utils.utils import *
 
+class GPT:
     @staticmethod
-    def cut(
-        thisBytes: bytearray,
-        i: int = 0,
-        n: int = 1
-    ) -> bytearray:
-        cutedBytes = Bytes.get(thisBytes, i, n)
-        thisBytes[:] = thisBytes[:i] + thisBytes[(i+n):]
-        return cutedBytes
+    def hasSignature(
+        firstSector: bytearray,
+        secondSector: bytearray
+    ):
+        if MBR.hasSignature(firstSector):
+            mbr = MBR(firstSector)
+            for i in range(len(mbr.partitionsTable)):
+                if mbr.partitionsTable[i]['TYPE'] == b'\xEE':
+                    if Bytes.cmp(
+                        first=Bytes.get(secondSector, n=8),
+                        second=b'\x54\x52\x41\x50\x20\x49\x46\x45',
+                        endian='big'
+                    ):
+                        return True
+        return False
 
-    @staticmethod
-    def cmp(
-        first: bytearray,
-        second: bytearray,
-        endian: str = 'little'
-    ) -> bool:
-        if endian.lower() == 'little':
-            return first == second
-        elif endian.lower() == 'big':
-            return first == second[::-1]
-        raise Exception("Invalid endian set")
-
-    @staticmethod
-    def sum(bytesToSum: bytearray) -> int:
-        sumBytes = 0
-        for i in range(len(bytesToSum)):
-            sumBytes |= bytesToSum[i]<<(8*i)
-        return sumBytes
-
-    @staticmethod
-    def toString(bytesToString: bytearray) -> str:
-        return f"0x{bytesToString.hex().upper()}"
+    def __init__(self,
+        primaryHeader: bytearray,
+        registers: bytearray
+    ):
+        self.primaryHeader = primaryHeader
+        self.partitionsRegisters = [
+            Bytes.cut(registers, n=128) for _ in range(4) for _ in range(32)
+        ]

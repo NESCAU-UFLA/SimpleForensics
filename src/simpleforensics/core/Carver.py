@@ -12,12 +12,14 @@
 
 from ..utils.consts import SECTOR_SIZE
 from ..structuredData.MBR import MBR
+from ..structuredData.GPT import GPT
 
 class Carver:
     def __init__(self, inputPath: str = ""):
         self.ACTIONS = {
             'READ': {
                 'MBR': self.readMBR,
+                'GPT': self.readGPT,
             },
             'CARVE': {}
         }
@@ -31,5 +33,17 @@ class Carver:
                     exit(f"{MBR(firstSector)}")
                 else:
                     raise Exception("Couldn't identify the MBR")
+        except FileNotFoundError:
+            raise Exception(f"{self.__inputPath} not found")
+    
+    def readGPT(self):
+        try:
+            with open(self.__inputPath, 'rb') as inputFile:
+                firstSector = bytearray(inputFile.read(SECTOR_SIZE))
+                secondSector = bytearray(inputFile.read(SECTOR_SIZE))
+                if GPT.hasSignature(firstSector, secondSector):
+                    exit(f"{GPT(secondSector, bytearray(inputFile.read(SECTOR_SIZE*32)))}")
+                else:
+                    raise Exception("Couldn't identify the GPT")
         except FileNotFoundError:
             raise Exception(f"{self.__inputPath} not found")

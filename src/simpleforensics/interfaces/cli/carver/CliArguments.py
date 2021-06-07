@@ -29,9 +29,15 @@ class CliArguments:
             help="Set to MBR reader",
             default=False
         )
+        parser.add_argument('--gpt',
+            action='store_true',
+            help="Set to GPT reader",
+            default=False
+        )
         self.options = parser.parse_args()
         self.input = self.options.input
         self.reader = {
-            'MBR': self.options.mbr
+            'MBR': self.options.mbr,
+            'GPT': self.options.gpt,
         }
         self.carver = {}

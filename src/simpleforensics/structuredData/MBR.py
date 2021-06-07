@@ -17,7 +17,10 @@ from ..utils.utils import *
 class MBR:
     @staticmethod
     def hasSignature(sector: bytearray):
-        return Bytes.get(sector, i=510, n=2) == b'\x55\xAA'
+        return Bytes.cmp(
+            first=Bytes.get(sector, i=510, n=2),
+            second=b'\x55\xAA',
+        )
 
     FILESYSTEM_MAP = {
         b'\x00': "No file system or partition",
