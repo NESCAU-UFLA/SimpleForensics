@@ -12,11 +12,9 @@
 #
 ## https://github.com/NESCAU-UFLA/SimpleForensics
 
-from .core.Imager import Imager
-
 import sys
 
-class CLIParser:
+class CliArguments:
     def __init__(self):
         self.__argv = sys.argv
         self.instanceArgs()
@@ -48,17 +46,6 @@ class CLIParser:
     
     def getFilePaths(self):
         return (self.inputPath, self.outputPath)
-    
-    def checkBlocksCount(self, imager: Imager):
-        if self.count:
-            imager.BLOCKS_COUNT = self.count
-
-    def checkBufferSize(self, imager: Imager):
-        if self.bufferSize:
-            imager.BUFFER_SIZE = self.bufferSize
 
     def isWipe(self):
         return '--wipe' in self.__argv
-    
-    def isMbrRead(self):
-        return '--mbr' in self.__argv

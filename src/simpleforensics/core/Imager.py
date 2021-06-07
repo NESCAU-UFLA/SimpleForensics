@@ -12,7 +12,6 @@
 
 from ..utils.Hasher import hasher
 from ..utils.consts import SECTOR_SIZE
-from ..structuredData.MBR import MBR
 
 class Imager:
     def __init__(self, inputPath: str = "", outputPath: str = ""):
@@ -70,14 +69,3 @@ class Imager:
                     data = outputFile.read(self.BUFFER_SIZE)
         except FileNotFoundError:
             raise Exception(f"{self.__outputPath} not found")
-
-    def readMBR(self):
-        try:
-            with open(self.__inputPath, 'rb') as inputFile:
-                firstSector = bytearray(inputFile.read(SECTOR_SIZE))
-                if MBR.hasSignature(firstSector):
-                    exit(f"{MBR(firstSector)}")
-                else:
-                    raise Exception("Couldn't identify the MBR")
-        except FileNotFoundError:
-            raise Exception(f"{self.__inputPath} not found")

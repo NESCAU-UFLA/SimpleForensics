@@ -10,21 +10,22 @@
 #
 ## https://github.com/NESCAU-UFLA/SimpleForensics
 
-from .core.Imager import Imager
-from .CLIParser import CLIParser
-
-def main():
-    parser = CLIParser()
-    inputPath, outputPath = parser.getFilePaths()
+def main_imager():
+    from .interfaces.cli.imager.CliArguments import CliArguments
+    from .core.Imager import Imager
+    arguments = CliArguments()
+    inputPath, outputPath = arguments.getFilePaths()
     imager = Imager(inputPath, outputPath)
-    parser.checkBufferSize(imager)
-    parser.checkBlocksCount(imager)
+    if arguments.count:
+        imager.BLOCKS_COUNT = arguments.count
+    if arguments.bufferSize:
+        imager.BUFFER_SIZE = arguments.bufferSize
     try:
-        if parser.isWipe():
+        if arguments.isWipe():
+            if not outputPath:
+                raise Exception("Must set the output file to be wiped!")
             imager.wipe()
             print("Disk wiped!")
-        elif parser.isMbrRead():
-            imager.readMBR()
         else:
             imager.copy()
             if imager.checkIntegrity():
@@ -44,3 +45,20 @@ def main():
         exit("You need root permissions to read this device")
     except Exception as e:
         exit(str(e))
+
+def main_carver():
+    def getAction(arguments):
+        for key, value in arguments.reader.items():
+            if value:
+                return ('READ', key)
+        for key, value in arguments.carver.items():
+            if value:
+                return ('CARVE', key)
+        raise Exception("No action specified")
+
+    from .interfaces.cli.carver.CliArguments import CliArguments
+    from .core.Carver import Carver
+    arguments = CliArguments()
+    carver = Carver(arguments.input)
+    action, searchFor = getAction(arguments)
+    carver.ACTIONS[action][searchFor]()

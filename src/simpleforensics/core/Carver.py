@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-
 ## SimpleForensics
 #
 # Authors:
@@ -12,7 +10,26 @@
 #
 ## https://github.com/NESCAU-UFLA/SimpleForensics
 
-from simpleforensics.SimpleForensics import main
+from ..utils.consts import SECTOR_SIZE
+from ..structuredData.MBR import MBR
 
-if __name__ == "__main__":
-    main()
+class Carver:
+    def __init__(self, inputPath: str = ""):
+        self.ACTIONS = {
+            'READ': {
+                'MBR': self.readMBR,
+            },
+            'CARVE': {}
+        }
+        self.__inputPath = inputPath
+
+    def readMBR(self):
+        try:
+            with open(self.__inputPath, 'rb') as inputFile:
+                firstSector = bytearray(inputFile.read(SECTOR_SIZE))
+                if MBR.hasSignature(firstSector):
+                    exit(f"{MBR(firstSector)}")
+                else:
+                    raise Exception("Couldn't identify the MBR")
+        except FileNotFoundError:
+            raise Exception(f"{self.__inputPath} not found")
