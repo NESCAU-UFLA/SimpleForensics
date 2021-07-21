@@ -23,21 +23,25 @@ class GPT:
     ):
         if MBR.hasSignature(firstSector):
             mbr = MBR(firstSector)
-            for i in range(len(mbr.partitionsTable)):
-                if mbr.partitionsTable[i]['TYPE'] == b'\xEE':
-                    if Bytes.cmp(
-                        first=Bytes.get(secondSector, n=8),
-                        second=b'\x54\x52\x41\x50\x20\x49\x46\x45',
-                        endian='invert'
-                    ):
-                        return True
+            if mbr.isGptProtection():
+                if Bytes.cmp(
+                    first=Bytes.get(secondSector, n=8),
+                    second=b'\x54\x52\x41\x50\x20\x49\x46\x45',
+                    endian='invert'
+                ):
+                    return True
         return False
 
     def __init__(self,
         primaryHeader: bytearray,
         registers: bytearray
     ):
-        self.primaryHeader = primaryHeader
+        self.primaryHeader = self.__setupHeader(primaryHeader)
         self.partitionsRegisters = [
             Bytes.cut(registers, n=128) for _ in range(4) for _ in range(32)
         ]
+    
+    #def __setupHeader(self, primaryHeader: bytearray):
+    #    return {
+    #        
+    #    }

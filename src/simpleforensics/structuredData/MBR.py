@@ -86,3 +86,9 @@ class MBR:
             return MBR.FILESYSTEM_MAP[bytes(flag)]
         except:
             return '?'
+    
+    def isGptProtection(self):
+        for table in self.partitionsTable:
+            if table['TYPE'] == b'\xEE':
+                return True
+        return False
