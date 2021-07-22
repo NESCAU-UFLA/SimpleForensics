@@ -38,10 +38,57 @@ class GPT:
     ):
         self.primaryHeader = self.__setupHeader(primaryHeader)
         self.partitionsRegisters = [
-            Bytes.cut(registers, n=128) for _ in range(4) for _ in range(32)
+            Bytes.cut(
+                registers, n=self.primaryHeader['REGISTER_ENTRY_SIZE']
+            ) for _ in self.primaryHeader['NUMBER_OF_PARTITIONS']
         ]
     
-    #def __setupHeader(self, primaryHeader: bytearray):
-    #    return {
-    #        
-    #    }
+    def __str__(self):
+        ph = self.primaryHeader
+        string = f"\nGPT (ass {ph['SIGNATURE']})\n\n"
+        string += f"HEADER INFORMATION:\n"
+        string += f"   REVISION: {ph['REVISION']}\n"
+        string += f"   HEADER SIZE: {ph['HEADER_SIZE']}\n"
+        string += f"   FIRST CRC32: {ph['CRC32_1']}\n"
+        string += f"   HEADER LOCATION: {ph['HEADER_LOCATION']}\n"
+        string += f"   HEADER BACKUP LOCATION: {ph['HEADER_LOCATION']}\n"
+        string += f"   NEXT FREE SPACE TO PARTITION: {ph['NEXT_FREE_PARTITION']}\n"
+        string += f"   LAST FREE SPACE TO PARTITION: {ph['LAST_FREE_PARTITION']}\n"
+        string += f"   UUID: {ph['UUID']}\n"
+        string += f"   START OF PARTITIONS REGISTERS: {ph['START_PARTITIONS_REGISTERS']}\n"
+        string += f"   NUMBER OF PARTITIONS: {ph['NUMBER_OF_PARTITIONS']}\n"
+        string += f"   REGISTERS ENTRY SIZE: {ph['REGISTER_ENTRY_SIZE']}\n"
+        string += f"   SECOND CRC32: {ph['CRC32_2']}\n\n"
+
+        return string
+
+    def __setupHeader(self, primaryHeader: bytearray):
+        signature = Bytes.toString(Bytes.cut(primaryHeader, n=8))
+        revision = Bytes.toString(Bytes.cut(primaryHeader, n=4))
+        headerSize = Bytes.sum(Bytes.cut(primaryHeader, n=4))
+        crc32_1 = Bytes.toString(Bytes.cut(primaryHeader, n=4))
+        Bytes.cut(primaryHeader, n=4) # reserved area
+        gptHeaderLocation = Bytes.sum(Bytes.cut(primaryHeader, n=8))
+        gptHeaderBackup = Bytes.sum(Bytes.cut(primaryHeader, n=8))
+        nextLocationToPartition = Bytes.sum(Bytes.cut(primaryHeader, n=8))
+        lastPartition = Bytes.sum(Bytes.cut(primaryHeader, n=8))
+        uuid = Bytes.toString(Bytes.cut(primaryHeader, n=16))
+        startPartitionsRegisters = Bytes.sum(Bytes.cut(primaryHeader, n=8))
+        numberOfPartitions = Bytes.sum(Bytes.cut(primaryHeader, n=4))
+        registerTableEntrySize = Bytes.sum(Bytes.cut(primaryHeader, n=4))
+        crc32_2 = Bytes.toString(Bytes.cut(primaryHeader, n=4))
+        return {
+            'SIGNATURE': signature,
+            'REVISION': revision,
+            'HEADER_SIZE': headerSize,
+            'CRC32_1': crc32_1,
+            'HEADER_LOCATION': gptHeaderLocation,
+            'HEADER_BACKUP': gptHeaderBackup,
+            'NEXT_FREE_PARTITION': nextLocationToPartition,
+            'LAST_FREE_PARTITION': lastPartition,
+            'UUID': uuid,
+            'START_PARTITIONS_REGISTERS': startPartitionsRegisters,
+            'NUMBER_OF_PARTITIONS': numberOfPartitions,
+            'REGISTER_ENTRY_SIZE': registerTableEntrySize,
+            'CRC32_2': crc32_2,
+        }
