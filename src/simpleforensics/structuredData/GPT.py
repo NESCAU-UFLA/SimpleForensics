@@ -40,7 +40,7 @@ class GPT:
         self.partitionsRegisters = self.__setupRegisters([
             Bytes.cut(
                 registers, n=self.primaryHeader['REGISTER_ENTRY_SIZE']
-            ) for _ in range(self.primaryHeader['NUMBER_OF_PARTITIONS'])
+            ) for _ in range(self.primaryHeader['NUMBER_OF_REGISTERS'])
         ])
     
     def __str__(self):
