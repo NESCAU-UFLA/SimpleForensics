@@ -37,29 +37,22 @@ class GPT:
         registers: bytearray
     ):
         self.primaryHeader = self.__setupHeader(primaryHeader)
-        self.partitionsRegisters = [
+        self.partitionsRegisters = self.__setupRegisters([
             Bytes.cut(
                 registers, n=self.primaryHeader['REGISTER_ENTRY_SIZE']
-            ) for _ in self.primaryHeader['NUMBER_OF_PARTITIONS']
-        ]
+            ) for _ in range(self.primaryHeader['NUMBER_OF_PARTITIONS'])
+        ])
     
     def __str__(self):
-        ph = self.primaryHeader
-        string = f"\nGPT (ass {ph['SIGNATURE']})\n\n"
+        string = f"\nGPT ({self.primaryHeader['SIGNATURE']})\n\n"
         string += f"HEADER INFORMATION:\n"
-        string += f"   REVISION: {ph['REVISION']}\n"
-        string += f"   HEADER SIZE: {ph['HEADER_SIZE']}\n"
-        string += f"   FIRST CRC32: {ph['CRC32_1']}\n"
-        string += f"   HEADER LOCATION: {ph['HEADER_LOCATION']}\n"
-        string += f"   HEADER BACKUP LOCATION: {ph['HEADER_LOCATION']}\n"
-        string += f"   NEXT FREE SPACE TO PARTITION: {ph['NEXT_FREE_PARTITION']}\n"
-        string += f"   LAST FREE SPACE TO PARTITION: {ph['LAST_FREE_PARTITION']}\n"
-        string += f"   UUID: {ph['UUID']}\n"
-        string += f"   START OF PARTITIONS REGISTERS: {ph['START_PARTITIONS_REGISTERS']}\n"
-        string += f"   NUMBER OF PARTITIONS: {ph['NUMBER_OF_PARTITIONS']}\n"
-        string += f"   REGISTERS ENTRY SIZE: {ph['REGISTER_ENTRY_SIZE']}\n"
-        string += f"   SECOND CRC32: {ph['CRC32_2']}\n\n"
-
+        for key, value in self.primaryHeader.items():
+            string += f"   {key}: {value}\n"
+        string += "\nPARTITION REGISTERS:\n"
+        for i, register in enumerate(self.partitionsRegisters):
+            string += f"\nREGISTER {i}:\n"
+            for key, value in register.items():
+                string += f"   {key}: {value}\n"
         return string
 
     def __setupHeader(self, primaryHeader: bytearray):
@@ -92,3 +85,21 @@ class GPT:
             'REGISTER_ENTRY_SIZE': registerTableEntrySize,
             'CRC32_2': crc32_2,
         }
+    
+    def __setupRegisters(self, registers: list):
+        registers = [{
+            'PARTITION_GUID': Bytes.cut(register, n=16),
+            'UNIQUE_PARTITION_GUID': Bytes.cut(register, n=16),
+            'FIRST_LBA_SECTOR': Bytes.cut(register, n=8),
+            'LAST_LBA_SECTOR': Bytes.cut(register, n=8),
+            'PARTITION_ATTRIBUTES': Bytes.cut(register, n=8),
+            'PARTITION_NAME': Bytes.cut(register, n=72),
+        } for register in registers]
+        return [{
+            'PARTITION_GUID': Bytes.toString(register['PARTITION_GUID']),
+            'UNIQUE_PARTITION_GUID': Bytes.toString(register['UNIQUE_PARTITION_GUID']),
+            'FIRST_LBA_SECTOR': Bytes.sum(register['FIRST_LBA_SECTOR']),
+            'LAST_LBA_SECTOR': Bytes.sum(register['LAST_LBA_SECTOR']),
+            'PARTITION_ATTRIBUTES': Bytes.toString(register['PARTITION_ATTRIBUTES']),
+            'PARTITION_NAME': Bytes.toString(register['PARTITION_NAME'], charset='utf-16'),
+        } for register in registers if not Bytes.isEmpty(register['PARTITION_GUID'])]

@@ -52,7 +52,7 @@ class MBR:
         self.signature = Bytes.toString(Bytes.cut(sector, n=2))
 
     def __str__(self):
-        string = f"\nMBR INFORMATION (ass {self.signature}):\n\n"
+        string = f"\nMBR INFORMATION ({self.signature}):\n\n"
         string += f"DISK SIGNATURE: {self.diskSignature}\n"
         string += f"WRITE PROTECTION ENABLED: {self.writeProtection}\n\n"
         for i, p in enumerate(self.partitionsTable):

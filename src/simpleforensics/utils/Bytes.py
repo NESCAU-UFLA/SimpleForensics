@@ -53,5 +53,14 @@ class Bytes:
         return sumBytes
 
     @staticmethod
-    def toString(bytesToString: bytearray) -> str:
-        return f"0x{bytesToString.hex().upper()}"
+    def toString(bytesToString: bytearray, charset: str = '') -> str:
+        if not charset:
+            return f"0x{bytesToString.hex().upper()}"
+        return bytesToString.decode(charset)
+    
+    @staticmethod
+    def isEmpty(bytesToCheck: bytearray) -> bool:
+        for b in bytesToCheck:
+            if b != 0:
+                return False
+        return True
