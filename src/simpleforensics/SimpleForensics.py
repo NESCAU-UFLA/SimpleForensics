@@ -36,11 +36,13 @@ def main_imager():
                 print("\nInput hashes:")
             else:
                 print(f"\nInput hashes for the first {imager.BLOCKS_COUNT} blocks:")
-            print(f"MD5: {imager.hashes['input']['md5']}")
-            print(f"SHA1: {imager.hashes['input']['sha1']}\n")
+            for key, value in imager.hashes['input'].items():
+                print(f"{key.upper()}: {value}")
+            print('')
             print("Output hashes:")
-            print(f"MD5: {imager.hashes['output']['md5']}")
-            print(f"SHA1: {imager.hashes['output']['sha1']}\n")
+            for key, value in imager.hashes['output'].items():
+                print(f"{key.upper()}: {value}")
+            print('')
     except PermissionError:
         exit("You need root permissions to read this device")
     except Exception as e:

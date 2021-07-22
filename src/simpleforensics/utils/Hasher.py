@@ -26,21 +26,21 @@ class Hasher:
             raise Exception("This class is a singleton!")
         else:
             Hasher.__instance = self
-        self.md5 = hashlib.md5()
         self.sha1 = hashlib.sha1()
+        self.sha256 = hashlib.sha256()
     
     def getHashes(self):
         return {
-            'md5': self.md5.hexdigest(),
             'sha1': self.sha1.hexdigest(),
+            'sha256': self.sha256.hexdigest(),
         }
 
     def clear(self):
-        self.md5 = hashlib.md5()
         self.sha1 = hashlib.sha1()
+        self.sha256 = hashlib.sha256()
 
     def update(self, data: bytes):
-        self.md5.update(data)
         self.sha1.update(data)
+        self.sha256.update(data)
 
 hasher = Hasher.getInstance()
